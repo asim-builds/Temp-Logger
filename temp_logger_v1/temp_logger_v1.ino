@@ -6,6 +6,11 @@
 #define DHTPIN 2
 #define DHTTYPE DHT11
 
+// RGB LED Pins
+#define RED_PIN 5
+#define GREEN_PIN 6
+#define BLUE_PIN 9
+
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C oled(U8G2_R0);
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -28,6 +33,41 @@ void setup() {
     while (1);
   }
   dht.begin();
+
+  // Setup RGB LED
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
+}
+
+void setColor(int r, int g, int b) {
+  analogWrite(RED_PIN, r);
+  analogWrite(GREEN_PIN, g);
+  analogWrite(BLUE_PIN, b);
+}
+
+
+
+void updateLED(float temperature) {
+  if (temperature < 8) {
+    // Icy Blue
+    setColor(0, 100, 255);  
+  } else if (temperature < 12) {
+    // Cool Blue
+    setColor(0, 120, 255);  
+  } else if (temperature < 20) {
+    // Light Blue
+    setColor(0, 180, 255);  
+  } else if (temperature < 25) {
+    // Green
+    setColor(0, 255, 0);    
+  } else if (temperature < 33) {
+    // Orange
+    setColor(255, 100, 0);  
+  } else {
+    // Red
+    setColor(255, 0, 0);    
+  }
 }
 
 void loop() {
@@ -38,6 +78,8 @@ void loop() {
   char humStr[10];
   dtostrf(temperature, 0, 1, tempStr);
   dtostrf(humidity, 0, 1, humStr);
+
+  updateLED(temperature);
 
   oled.firstPage();
   do {
