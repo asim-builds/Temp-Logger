@@ -2,6 +2,7 @@
 #include <U8g2lib.h>
 #include <Wire.h>
 #include <DHT.h>
+#include <avr/wdt.h>
 
 // Pin definitions
 #define DHTPIN 2
@@ -68,6 +69,9 @@ void setup() {
   
   // Initialize watchdog
   lastActivityTime = millis();
+
+  // Setup a hardware watchdog
+  wdt_enable(WDTO_2S);
   
   Serial.println(F("Setup complete"));
 }
@@ -150,6 +154,9 @@ void checkTemp(float temp) {
 }
 
 void loop() {
+  // Reset the hardware watchdog
+  wdt_reset();
+
   // Reset watchdog at start of loop
   kickWatchdog();
   
