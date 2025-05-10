@@ -13,7 +13,7 @@ A simple environment monitor built with Arduino. This project reads temperature 
 - Includes a **push button** to:
   - Switch between °C and °F display modes
   - Turn the RGB LED on/off
-- Uses an **RGB LED** to provide visual feedback on environmental conditions:
+- Uses an **RGB LED** to provide visual feedback on environmental conditions. Example:
   - 🔴 Red: High temperature
   - 🔵 Blue: Low temperature
   - 🟢 Green: Normal range
