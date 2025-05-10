@@ -39,6 +39,9 @@ float trendBaseTemp = 0;
 unsigned long lastQuoteChangeTime = 0;
 const unsigned long QUOTE_CHANGE_INTERVAL = 15000; // 15 seconds between quote changes
 
+// Debugging
+const bool DEBUG = false;
+
 // Device instances
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C oled(U8G2_R0);
 DHT dht(DHTPIN, DHTTYPE);
@@ -142,7 +145,7 @@ bool checkButton() {
     // Toggle temperature unit
     displayInCelsius = !displayInCelsius;
     unitChanged = true;
-    Serial.println(F("Toggled temperature unit"));
+    if (DEBUG) Serial.println(F("Toggled temperature unit"));
   }
   
   lastButtonState = btnState;
@@ -159,8 +162,10 @@ void checkLedButton() {
     
     // Toggle LED state
     ledEnabled = !ledEnabled;
-    Serial.print(F("LED toggled: "));
-    Serial.println(ledEnabled ? F("ON") : F("OFF"));
+    if (DEBUG) {
+      Serial.print(F("LED toggled: "));
+      Serial.println(ledEnabled ? F("ON") : F("OFF"));
+    }
   }
   
   lastLedButtonState = btnState;
@@ -174,7 +179,7 @@ void updateTrend(float currentTemp) {
   if (trendBaseTemp == 0) {
     trendBaseTemp = currentTemp;
     lastTrendTime = currentTime;
-    Serial.println(F("First trend reading - initializing baseline"));
+    if (DEBUG) Serial.println(F("First trend reading - initializing baseline"));
     return;
   }
   
@@ -189,19 +194,25 @@ void updateTrend(float currentTemp) {
     // Threshold of 0.5 degrees over 5 minutes for meaningful change
     if (diff >= 0.5) {
       trendSymbol = 1; // Up arrow
-      Serial.print(F("5min Trend: UP (diff: "));
-      Serial.print(diff);
-      Serial.println(F("°C)"));
+      if (DEBUG) {
+        Serial.print(F("5min Trend: UP (diff: "));
+        Serial.print(diff);
+        Serial.println(F("°C)"));
+      }
     } else if (diff <= -0.5) {
       trendSymbol = 2; // Down arrow
-      Serial.print(F("5min Trend: DOWN (diff: "));
-      Serial.print(diff);
-      Serial.println(F("°C)"));
+      if (DEBUG) {
+        Serial.print(F("5min Trend: DOWN (diff: "));
+        Serial.print(diff);
+        Serial.println(F("°C)"));
+      }
     } else {
       trendSymbol = 0; // Stable
-      Serial.print(F("5min Trend: STABLE (diff: "));
-      Serial.print(diff);
-      Serial.println(F("°C)"));
+      if (DEBUG) {
+        Serial.print(F("5min Trend: STABLE (diff: "));
+        Serial.print(diff);
+        Serial.println(F("°C)"));
+      }
     }
     
     // Reset the base temperature and time for next interval
@@ -235,7 +246,7 @@ void checkTemp(float temp, bool isCelsius) {
   // Convert to Celsius for consistent evaluation if in F mode
   float tempForCheck = isCelsius ? temp : (temp - 32.0) * 5.0 / 9.0;
   
-  bool isAbnormal = (tempForCheck >= 33 || tempForCheck < 5);
+  bool isAbnormal = (tempForCheck >= 40 || tempForCheck < 5);
   
   if (isAbnormal && wasNormal) {
     // Warning beep
@@ -281,12 +292,14 @@ void loop() {
   updateTrend(temperature);
   
   // Print values to serial for debugging
-  Serial.print("Humidity: ");
-  Serial.print(humidity);
-  Serial.print("%, Temp: ");
-  Serial.print(temperature);
-  Serial.print("°C, LED: ");
-  Serial.println(ledEnabled ? "ON" : "OFF");
+  if (DEBUG) {
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.print("%, Temp: ");
+    Serial.print(temperature);
+    Serial.print("°C, LED: ");
+    Serial.println(ledEnabled ? "ON" : "OFF");
+  }
   
   // Convert temperature if needed
   float displayTemp = temperature;
@@ -350,8 +363,10 @@ void loop() {
     lastQuoteChangeTime = currentTime;
     
     // Log quote change
-    Serial.print(F("Quote changed to #"));
-    Serial.println(currentQuote);
+    if (DEBUG) {
+      Serial.print(F("Quote changed to #"));
+      Serial.println(currentQuote);
+    }
   }
   
   // Check if system is hanging
